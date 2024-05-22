@@ -9,7 +9,7 @@ namespace CutTool
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage: CutTool <file> <cut-options>");
+                Console.WriteLine("Usage: CutTool <file> -f<field_number>");
                 return;
             }
 
@@ -22,6 +22,12 @@ namespace CutTool
                 return;
             }
 
+            if (!cutOption.StartsWith("-f") || !int.TryParse(cutOption.Substring(2), out int fieldNumber) || fieldNumber < 1)
+            {
+                Console.WriteLine("Invalid cut option. Use format '-f<field_number>' where field_number is an integer greater than 0.");
+                return;
+            }
+
             try
             {
                 using (var reader = new StreamReader(filePath))
@@ -29,8 +35,11 @@ namespace CutTool
                     string line;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        string result = ProcessLine(line, cutOption);
-                        Console.WriteLine(result);
+                        string result = ExtractField(line, fieldNumber);
+                        if (result != null)
+                        {
+                            Console.WriteLine(result);
+                        }
                     }
                 }
             }
@@ -40,25 +49,18 @@ namespace CutTool
             }
         }
 
-        static string ProcessLine(string line, string cutOption)
+        static string ExtractField(string line, int fieldNumber)
         {
-            // This is a very basic implementation, assuming cutOption is something like "1-5" to extract characters from 1 to 5.
-            // You will need to handle different options based on the `cut` command specification.
-
-            var parts = cutOption.Split('-');
-            if (parts.Length != 2 || !int.TryParse(parts[0], out int start) || !int.TryParse(parts[1], out int end))
+            var fields = line.Split('\t');
+            if (fields.Length >= fieldNumber)
             {
-                Console.WriteLine("Invalid cut option. Use format 'start-end' where start and end are integers.");
-                return line;
+                return fields[fieldNumber - 1];
             }
-
-            if (start < 1 || end < start || end > line.Length)
+            else
             {
-                Console.WriteLine("Invalid range.");
-                return line;
+                Console.WriteLine($"Line '{line}' does not have {fieldNumber} fields.");
+                return null;
             }
-
-            return line.Substring(start - 1, end - start + 1);
         }
     }
 }

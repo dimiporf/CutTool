@@ -7,14 +7,20 @@ namespace CutTool
     {
         static void Main(string[] args)
         {
-            if (args.Length < 2)
+            if (args.Length < 2 || args.Length > 3)
             {
-                Console.WriteLine("Usage: CutTool <file> -f<field_number>");
+                Console.WriteLine("Usage: CutTool <file> -f<field_number> [-d<delimiter>]");
                 return;
             }
 
             string filePath = args[0];
             string cutOption = args[1];
+            string delimiter = ","; // Default to comma
+
+            if (args.Length == 3 && args[2].StartsWith("-d"))
+            {
+                delimiter = args[2].Substring(2);
+            }
 
             if (!File.Exists(filePath))
             {
@@ -35,7 +41,7 @@ namespace CutTool
                     string line;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        string result = ExtractField(line, fieldNumber);
+                        string result = ExtractField(line, fieldNumber, delimiter);
                         if (result != null)
                         {
                             Console.WriteLine(result);
@@ -49,9 +55,9 @@ namespace CutTool
             }
         }
 
-        static string ExtractField(string line, int fieldNumber)
+        static string ExtractField(string line, int fieldNumber, string delimiter)
         {
-            var fields = line.Split('\t');
+            var fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
             if (fields.Length >= fieldNumber)
             {
                 return fields[fieldNumber - 1];

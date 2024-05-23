@@ -9,40 +9,62 @@ namespace CutTool
     {
         static void Main(string[] args)
         {
-            // Check if at least two arguments are provided
-            if (args.Length < 2)
+            // Check if at least one argument is provided
+            if (args.Length < 1)
             {
-                Console.WriteLine("Usage: dotnet run <file_path> <field_number> [<delimiter>]");
+                Console.WriteLine("Usage: dotnet run <file_path> [-field <field_list> [<delimiter>]] [-delim <delimiter>]");
                 return;
             }
 
             string filePath = args[0];
-            int fieldNumber;
+            string delimiter = "\t"; // Default delimiter
 
-            // Parse field number from second argument
-            if (!int.TryParse(args[1], out fieldNumber) || fieldNumber <= 0)
+            // Check for the -delim option
+            for (int i = 1; i < args.Length - 1; i++)
             {
-                Console.WriteLine("Field number must be a valid positive integer.");
-                return;
+                if (args[i] == "-delim")
+                {
+                    delimiter = args[i + 1];
+                    break;
+                }
             }
 
-            // Use tab as default delimiter
-            string delimiter = "\t";
-
-            // Check if delimiter is provided as third argument
-            if (args.Length >= 3)
+            // Check for the -field option
+            int[] fieldList = null;
+            for (int i = 1; i < args.Length - 1; i++)
             {
-                delimiter = args[2];
+                if (args[i] == "-field")
+                {
+                    // Parse the field list
+                    string[] fieldListStr = args[i + 1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    fieldList = new int[fieldListStr.Length];
+                    for (int j = 0; j < fieldListStr.Length; j++)
+                    {
+                        if (!int.TryParse(fieldListStr[j], out fieldList[j]) || fieldList[j] <= 0)
+                        {
+                            Console.WriteLine("Field list must contain valid positive integers.");
+                            return;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // If no delimiter is provided, determine the delimiter based on the file content
+            if (delimiter == "\t")
+            {
+                delimiter = FileProcessor.DetermineDelimiter(filePath);
+            }
+            if (fieldList != null)
+            {
+                // Process the file with the specified field list and delimiter
+                FileProcessor.ProcessFile(filePath, fieldList, delimiter);
             }
             else
             {
-                // If no delimiter is provided, determine the delimiter based on the file content
-                delimiter = FileProcessor.DetermineDelimiter(filePath);
+                // Process the file without specifying fields (returns all fields) and with the specified delimiter
+                FileProcessor.ProcessFile(filePath, delimiter);
             }
-
-            // Process the file with the specified field number and delimiter
-            FileProcessor.ProcessFile(filePath, fieldNumber, delimiter);
         }
-
     }
 }

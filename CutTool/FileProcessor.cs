@@ -9,40 +9,47 @@ namespace CutTool
     public static class FileProcessor
     {
         /// <summary>
-        /// Validates if the specified file exists.
-        /// </summary>
-        /// <param name="filePath">The path to the file to be validated.</param>
-        /// <returns>True if the file exists, otherwise false.</returns>
-        public static bool ValidateFile(string filePath)
-        {
-            return File.Exists(filePath);
-        }
-
-        /// <summary>
         /// Processes the specified file, extracting the specified field (column) for each line and printing it to the console.
         /// </summary>
         /// <param name="filePath">The path to the file to be processed.</param>
-        /// <param name="fieldNumber">The number of the field (column) to be extracted.</param>
         /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
-        public static void ProcessFile(string filePath, int fieldNumber, string delimiter = null)
+        public static void ProcessFile(string filePath, string delimiter)
+        {
+            ProcessFile(filePath, null, delimiter);
+        }
+
+        /// <summary>
+        /// Processes the specified file, extracting the specified fields (columns) for each line and printing them to the console.
+        /// </summary>
+        /// <param name="filePath">The path to the file to be processed.</param>
+        /// <param name="fieldNumbers">The numbers of the fields (columns) to be extracted.</param>
+        /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
+        public static void ProcessFile(string filePath, int[] fieldNumbers, string delimiter)
         {
             try
             {
-                // If delimiter is not provided, use tab or comma based on the file content
-                if (delimiter == null)
-                {
-                    delimiter = DetermineDelimiter(filePath);
-                }
-
                 using (var reader = new StreamReader(filePath))
                 {
                     string line;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        string result = ExtractField(line, fieldNumber, delimiter);
-                        if (result != null)
+                        string[] fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
+
+                        // Construct the output line with the specified fields
+                        string outputLine = "";
+                        foreach (int fieldNumber in fieldNumbers)
                         {
-                            Console.WriteLine(result);
+                            if (fieldNumber > 0 && fieldNumber <= fields.Length)
+                            {
+                                outputLine += fields[fieldNumber - 1] + delimiter;
+                            }
+                        }
+
+                        // Remove the trailing delimiter and print the output line
+                        if (!string.IsNullOrEmpty(outputLine))
+                        {
+                            outputLine = outputLine.TrimEnd(delimiter.ToCharArray());
+                            Console.WriteLine(outputLine);
                         }
                     }
                 }
@@ -59,8 +66,15 @@ namespace CutTool
         /// </summary>
         /// <param name="filePath">The path to the file.</param>
         /// <returns>The delimiter used in the file.</returns>
-        public static string DetermineDelimiter(string filePath)
+        public static string DetermineDelimiter(string filePath, string specifiedDelimiter = null)
         {
+            // Check if a specified delimiter is provided
+            if (!string.IsNullOrEmpty(specifiedDelimiter))
+            {
+                // Return the specified delimiter
+                return specifiedDelimiter;
+            }
+
             // Read the first line of the file to determine the delimiter
             using (var reader = new StreamReader(filePath))
             {
@@ -82,27 +96,5 @@ namespace CutTool
             }
         }
 
-
-
-        /// <summary>
-        /// Extracts the specified field (column) from the given line using the specified delimiter.
-        /// </summary>
-        /// <param name="line">The line from which the field is to be extracted.</param>
-        /// <param name="fieldNumber">The number of the field (column) to be extracted.</param>
-        /// <param name="delimiter">The delimiter used to separate fields (columns) in the line.</param>
-        /// <returns>The extracted field, or null if the line does not have enough fields.</returns>
-        private static string ExtractField(string line, int fieldNumber, string delimiter)
-        {
-            var fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
-            if (fields.Length >= fieldNumber)
-            {
-                return fields[fieldNumber - 1];
-            }
-            else
-            {
-                Logger.Log($"Line '{line}' does not have {fieldNumber} fields.");
-                return null;
-            }
-        }
     }
 }

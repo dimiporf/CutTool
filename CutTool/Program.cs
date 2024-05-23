@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace CutTool
 {
@@ -7,8 +6,11 @@ namespace CutTool
     {
         static void Main(string[] args)
         {
+            Logger.Log("Application started");
+
             if (args.Length < 2 || args.Length > 3)
             {
+                Logger.Log("Invalid number of arguments");
                 Console.WriteLine("Usage: CutTool <file> -f<field_number> [-d<delimiter>]");
                 return;
             }
@@ -22,51 +24,22 @@ namespace CutTool
                 delimiter = args[2].Substring(2);
             }
 
-            if (!File.Exists(filePath))
+            if (!FileProcessor.ValidateFile(filePath))
             {
+                Logger.Log($"File not found: {filePath}");
                 Console.WriteLine($"File not found: {filePath}");
                 return;
             }
 
             if (!cutOption.StartsWith("-f") || !int.TryParse(cutOption.Substring(2), out int fieldNumber) || fieldNumber < 1)
             {
+                Logger.Log("Invalid cut option");
                 Console.WriteLine("Invalid cut option. Use format '-f<field_number>' where field_number is an integer greater than 0.");
                 return;
             }
 
-            try
-            {
-                using (var reader = new StreamReader(filePath))
-                {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        string result = ExtractField(line, fieldNumber, delimiter);
-                        if (result != null)
-                        {
-                            Console.WriteLine(result);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error reading file: {ex.Message}");
-            }
-        }
-
-        static string ExtractField(string line, int fieldNumber, string delimiter)
-        {
-            var fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
-            if (fields.Length >= fieldNumber)
-            {
-                return fields[fieldNumber - 1];
-            }
-            else
-            {
-                Console.WriteLine($"Line '{line}' does not have {fieldNumber} fields.");
-                return null;
-            }
+            FileProcessor.ProcessFile(filePath, fieldNumber, delimiter);
+            Logger.Log("Application finished");
         }
     }
 }

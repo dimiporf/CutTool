@@ -2,44 +2,47 @@
 
 namespace CutTool
 {
+    /// <summary>
+    /// Main program class responsible for parsing command-line arguments and invoking file processing.
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
         {
-            Logger.Log("Application started");
-
-            if (args.Length < 2 || args.Length > 3)
+            // Check if at least two arguments are provided
+            if (args.Length < 2)
             {
-                Logger.Log("Invalid number of arguments");
-                Console.WriteLine("Usage: CutTool <file> -f<field_number> [-d<delimiter>]");
+                Console.WriteLine("Usage: dotnet run <file_path> <field_number> [<delimiter>]");
                 return;
             }
 
             string filePath = args[0];
-            string cutOption = args[1];
-            string delimiter = ","; // Default to comma
+            int fieldNumber;
 
-            if (args.Length == 3 && args[2].StartsWith("-d"))
+            // Parse field number from second argument
+            if (!int.TryParse(args[1], out fieldNumber) || fieldNumber <= 0)
             {
-                delimiter = args[2].Substring(2);
-            }
-
-            if (!FileProcessor.ValidateFile(filePath))
-            {
-                Logger.Log($"File not found: {filePath}");
-                Console.WriteLine($"File not found: {filePath}");
+                Console.WriteLine("Field number must be a valid positive integer.");
                 return;
             }
 
-            if (!cutOption.StartsWith("-f") || !int.TryParse(cutOption.Substring(2), out int fieldNumber) || fieldNumber < 1)
+            // Use tab as default delimiter
+            string delimiter = "\t";
+
+            // Check if delimiter is provided as third argument
+            if (args.Length >= 3)
             {
-                Logger.Log("Invalid cut option");
-                Console.WriteLine("Invalid cut option. Use format '-f<field_number>' where field_number is an integer greater than 0.");
-                return;
+                delimiter = args[2];
+            }
+            else
+            {
+                // If no delimiter is provided, determine the delimiter based on the file content
+                delimiter = FileProcessor.DetermineDelimiter(filePath);
             }
 
+            // Process the file with the specified field number and delimiter
             FileProcessor.ProcessFile(filePath, fieldNumber, delimiter);
-            Logger.Log("Application finished");
         }
+
     }
 }

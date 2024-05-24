@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace CutTool
 {
@@ -9,48 +11,58 @@ namespace CutTool
     public static class FileProcessor
     {
         /// <summary>
-        /// Processes the specified file, extracting the specified field (column) for each line and printing it to the console.
-        /// </summary>
-        /// <param name="filePath">The path to the file to be processed.</param>
-        /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
-        public static void ProcessFile(string filePath, string delimiter)
-        {
-            ProcessFile(filePath, null, delimiter);
-        }
-
-        /// <summary>
         /// Processes the specified file, extracting the specified fields (columns) for each line and printing them to the console.
         /// </summary>
         /// <param name="filePath">The path to the file to be processed.</param>
         /// <param name="fieldNumbers">The numbers of the fields (columns) to be extracted.</param>
         /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
-        public static void ProcessFile(string filePath, int[] fieldNumbers, string delimiter)
+        /// <param name="unique">Whether to output only unique lines.</param>
+        public static void ProcessFile(string filePath, int[] fieldNumbers, string delimiter, bool unique = false)
         {
             try
             {
                 using (var reader = new StreamReader(filePath))
                 {
+                    var lines = new List<string>();
                     string line;
+
                     while ((line = reader.ReadLine()) != null)
                     {
                         string[] fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
 
                         // Construct the output line with the specified fields
                         string outputLine = "";
-                        foreach (int fieldNumber in fieldNumbers)
+                        if (fieldNumbers != null)
                         {
-                            if (fieldNumber > 0 && fieldNumber <= fields.Length)
+                            foreach (int fieldNumber in fieldNumbers)
                             {
-                                outputLine += fields[fieldNumber - 1] + delimiter;
+                                if (fieldNumber > 0 && fieldNumber <= fields.Length)
+                                {
+                                    outputLine += fields[fieldNumber - 1] + delimiter;
+                                }
                             }
                         }
+                        else
+                        {
+                            outputLine = string.Join(delimiter, fields);
+                        }
 
-                        // Remove the trailing delimiter and print the output line
+                        // Remove the trailing delimiter and add to lines list
                         if (!string.IsNullOrEmpty(outputLine))
                         {
                             outputLine = outputLine.TrimEnd(delimiter.ToCharArray());
-                            Console.WriteLine(outputLine);
+                            lines.Add(outputLine);
                         }
+                    }
+
+                    if (unique)
+                    {
+                        lines = lines.Distinct().ToList();
+                    }
+
+                    foreach (var outputLine in lines)
+                    {
+                        Console.WriteLine(outputLine);
                     }
                 }
             }
@@ -62,9 +74,21 @@ namespace CutTool
         }
 
         /// <summary>
+        /// Processes the specified file, extracting all fields (columns) for each line and printing them to the console.
+        /// </summary>
+        /// <param name="filePath">The path to the file to be processed.</param>
+        /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
+        /// <param name="unique">Whether to output only unique lines.</param>
+        public static void ProcessFile(string filePath, string delimiter, bool unique = false)
+        {
+            ProcessFile(filePath, null, delimiter, unique);
+        }
+
+        /// <summary>
         /// Determines the delimiter used in the file based on its contents.
         /// </summary>
         /// <param name="filePath">The path to the file.</param>
+        /// <param name="specifiedDelimiter">The delimiter specified by the user.</param>
         /// <returns>The delimiter used in the file.</returns>
         public static string DetermineDelimiter(string filePath, string specifiedDelimiter = null)
         {
@@ -95,6 +119,5 @@ namespace CutTool
                 }
             }
         }
-
     }
 }

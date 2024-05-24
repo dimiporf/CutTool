@@ -18,6 +18,7 @@ namespace CutTool
 
             string filePath = args[0];
             string delimiter = "\t"; // Default delimiter
+            bool unique = false;
 
             // Check for the -delim option
             for (int i = 1; i < args.Length - 1; i++)
@@ -46,6 +47,16 @@ namespace CutTool
                             return;
                         }
                     }
+                    break;
+                }
+            }
+
+            // Check for the -uniq option
+            for (int i = 1; i < args.Length; i++)
+            {
+                if (args[i] == "-uniq")
+                {
+                    unique = true;
                     break;
                 }
             }

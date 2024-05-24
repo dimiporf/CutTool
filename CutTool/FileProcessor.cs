@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace CutTool
 {
@@ -11,21 +10,31 @@ namespace CutTool
     public static class FileProcessor
     {
         /// <summary>
+        /// Processes the specified file, extracting the specified field (column) for each line and printing it to the console.
+        /// </summary>
+        /// <param name="filePath">The path to the file to be processed.</param>
+        /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
+        /// <param name="unique">Whether to output unique values only.</param>
+        public static void ProcessFile(string filePath, string delimiter, bool unique)
+        {
+            ProcessFile(filePath, null, delimiter, unique);
+        }
+
+        /// <summary>
         /// Processes the specified file, extracting the specified fields (columns) for each line and printing them to the console.
         /// </summary>
         /// <param name="filePath">The path to the file to be processed.</param>
         /// <param name="fieldNumbers">The numbers of the fields (columns) to be extracted.</param>
         /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
-        /// <param name="unique">Whether to output only unique lines.</param>
-        public static void ProcessFile(string filePath, int[] fieldNumbers, string delimiter, bool unique = false)
+        /// <param name="unique">Whether to output unique values only.</param>
+        public static void ProcessFile(string filePath, int[] fieldNumbers, string delimiter, bool unique)
         {
             try
             {
+                var seenValues = new HashSet<string>();
                 using (var reader = new StreamReader(filePath))
                 {
-                    var lines = new List<string>();
                     string line;
-
                     while ((line = reader.ReadLine()) != null)
                     {
                         string[] fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
@@ -47,22 +56,23 @@ namespace CutTool
                             outputLine = string.Join(delimiter, fields);
                         }
 
-                        // Remove the trailing delimiter and add to lines list
+                        // Remove the trailing delimiter
                         if (!string.IsNullOrEmpty(outputLine))
                         {
                             outputLine = outputLine.TrimEnd(delimiter.ToCharArray());
-                            lines.Add(outputLine);
+
+                            if (unique)
+                            {
+                                if (seenValues.Add(outputLine))
+                                {
+                                    Console.WriteLine(outputLine);
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine(outputLine);
+                            }
                         }
-                    }
-
-                    if (unique)
-                    {
-                        lines = lines.Distinct().ToList();
-                    }
-
-                    foreach (var outputLine in lines)
-                    {
-                        Console.WriteLine(outputLine);
                     }
                 }
             }
@@ -74,21 +84,9 @@ namespace CutTool
         }
 
         /// <summary>
-        /// Processes the specified file, extracting all fields (columns) for each line and printing them to the console.
-        /// </summary>
-        /// <param name="filePath">The path to the file to be processed.</param>
-        /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
-        /// <param name="unique">Whether to output only unique lines.</param>
-        public static void ProcessFile(string filePath, string delimiter, bool unique = false)
-        {
-            ProcessFile(filePath, null, delimiter, unique);
-        }
-
-        /// <summary>
         /// Determines the delimiter used in the file based on its contents.
         /// </summary>
         /// <param name="filePath">The path to the file.</param>
-        /// <param name="specifiedDelimiter">The delimiter specified by the user.</param>
         /// <returns>The delimiter used in the file.</returns>
         public static string DetermineDelimiter(string filePath, string specifiedDelimiter = null)
         {

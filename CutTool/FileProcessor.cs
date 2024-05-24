@@ -4,45 +4,39 @@ using System.IO;
 
 namespace CutTool
 {
-    /// <summary>
-    /// Static class responsible for file processing operations.
-    /// </summary>
+    // Static class to handle file processing
     public static class FileProcessor
     {
-        /// <summary>
-        /// Processes the specified file, extracting the specified field (column) for each line and printing it to the console.
-        /// </summary>
-        /// <param name="filePath">The path to the file to be processed.</param>
-        /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
-        /// <param name="unique">Whether to output unique values only.</param>
+        // Method to process the file with specified delimiter and unique flag, without specifying fields
         public static void ProcessFile(string filePath, string delimiter, bool unique)
         {
+            // Call the overloaded ProcessFile method with null for fieldNumbers
             ProcessFile(filePath, null, delimiter, unique);
         }
 
-        /// <summary>
-        /// Processes the specified file, extracting the specified fields (columns) for each line and printing them to the console.
-        /// </summary>
-        /// <param name="filePath">The path to the file to be processed.</param>
-        /// <param name="fieldNumbers">The numbers of the fields (columns) to be extracted.</param>
-        /// <param name="delimiter">The delimiter used to separate fields (columns) in the file.</param>
-        /// <param name="unique">Whether to output unique values only.</param>
+        // Overloaded method to process the file with specified fields, delimiter, and unique flag
         public static void ProcessFile(string filePath, int[] fieldNumbers, string delimiter, bool unique)
         {
             try
             {
+                // HashSet to keep track of seen values if unique flag is true
                 var seenValues = new HashSet<string>();
+
+                // StreamReader to read the file line by line
                 using (var reader = new StreamReader(filePath))
                 {
                     string line;
+                    // Read each line from the file
                     while ((line = reader.ReadLine()) != null)
                     {
+                        // Split the line into fields based on the specified delimiter
                         string[] fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
 
                         // Construct the output line with the specified fields
                         string outputLine = "";
                         if (fieldNumbers != null)
                         {
+                            // If specific fields are specified, concatenate them
                             foreach (int fieldNumber in fieldNumbers)
                             {
                                 if (fieldNumber > 0 && fieldNumber <= fields.Length)
@@ -53,14 +47,16 @@ namespace CutTool
                         }
                         else
                         {
+                            // If no specific fields are specified, use the whole line
                             outputLine = string.Join(delimiter, fields);
                         }
 
-                        // Remove the trailing delimiter
+                        // Remove the trailing delimiter from the output line
                         if (!string.IsNullOrEmpty(outputLine))
                         {
                             outputLine = outputLine.TrimEnd(delimiter.ToCharArray());
 
+                            // If unique flag is true, print only unique lines
                             if (unique)
                             {
                                 if (seenValues.Add(outputLine))
@@ -78,22 +74,18 @@ namespace CutTool
             }
             catch (Exception ex)
             {
+                // Log and print any exceptions that occur
                 Logger.Log($"Error reading file: {ex.Message}");
                 Console.WriteLine($"Error reading file: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Determines the delimiter used in the file based on its contents.
-        /// </summary>
-        /// <param name="filePath">The path to the file.</param>
-        /// <returns>The delimiter used in the file.</returns>
+        // Method to determine the delimiter based on the first line of the file or a specified delimiter
         public static string DetermineDelimiter(string filePath, string specifiedDelimiter = null)
         {
-            // Check if a specified delimiter is provided
+            // If a delimiter is specified, use it
             if (!string.IsNullOrEmpty(specifiedDelimiter))
             {
-                // Return the specified delimiter
                 return specifiedDelimiter;
             }
 
@@ -111,7 +103,7 @@ namespace CutTool
                 }
                 else
                 {
-                    // If neither comma nor tab found, default to tab delimiter
+                    // Default to tab delimiter if neither comma nor tab is found
                     Console.WriteLine("Neither comma nor tab delimiter found. Defaulting to tab delimiter.");
                     return "\t";
                 }

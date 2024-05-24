@@ -1,87 +1,70 @@
-﻿using System;
-
-namespace CutTool
+﻿namespace CutTool
 {
-    /// <summary>
-    /// Static class responsible for parsing command-line arguments.
-    /// </summary>
+    // Static class to handle parsing of command-line arguments
     public static class InputParser
     {
-        /// <summary>
-        /// Parses the command-line arguments and extracts the file path.
-        /// </summary>
-        /// <param name="args">The command-line arguments.</param>
-        /// <returns>The file path.</returns>
+        // Method to parse the file path from the command-line arguments
         public static string ParseFilePath(string[] args)
         {
-            if (args.Length < 1)
-            {
-                Console.WriteLine("Usage: dotnet run <file_path> [-field <field_list> [<delimiter>]] [-delim <delimiter>]");
-                Environment.Exit(1);
-            }
-            return args[0];
+            // If there are arguments, the first one is assumed to be the file path
+            return args.Length > 0 ? args[0] : null;
         }
 
-        /// <summary>
-        /// Parses the command-line arguments and extracts the delimiter if specified.
-        /// </summary>
-        /// <param name="args">The command-line arguments.</param>
-        /// <returns>The delimiter.</returns>
+        // Method to parse the delimiter from the command-line arguments
         public static string ParseDelimiter(string[] args)
         {
-            for (int i = 1; i < args.Length - 1; i++)
+            // Iterate through the arguments to find the "-delim" option
+            for (int i = 0; i < args.Length - 1; i++)
             {
                 if (args[i] == "-delim")
                 {
+                    // Return the delimiter value following the "-delim" option
                     return args[i + 1];
                 }
             }
-            return "\t"; // Default delimiter
+            return "\t"; // Default to tab delimiter if not specified
         }
 
-        /// <summary>
-        /// Parses the command-line arguments and extracts the field list if specified.
-        /// </summary>
-        /// <param name="args">The command-line arguments.</param>
-        /// <returns>The field list as an array of integers.</returns>
+        // Method to parse the list of fields to extract from the command-line arguments
         public static int[] ParseFieldList(string[] args)
         {
-            for (int i = 1; i < args.Length - 1; i++)
+            // Iterate through the arguments to find the "-field" option
+            for (int i = 0; i < args.Length - 1; i++)
             {
                 if (args[i] == "-field")
                 {
-                    // Parse the field list
+                    // Split the field list string by commas and remove empty entries
                     string[] fieldListStr = args[i + 1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     int[] fieldList = new int[fieldListStr.Length];
+                    // Convert each field number from string to integer
                     for (int j = 0; j < fieldListStr.Length; j++)
                     {
                         if (!int.TryParse(fieldListStr[j], out fieldList[j]) || fieldList[j] <= 0)
                         {
+                            // If conversion fails or number is not positive, display an error
                             Console.WriteLine("Field list must contain valid positive integers.");
-                            Environment.Exit(1);
+                            return null;
                         }
                     }
-                    return fieldList;
+                    return fieldList; // Return the list of field numbers
                 }
             }
-            return null;
+            return null; // Return null if "-field" option is not found
         }
 
-        /// <summary>
-        /// Parses the command-line arguments and checks if the unique flag is specified.
-        /// </summary>
-        /// <param name="args">The command-line arguments.</param>
-        /// <returns>True if the unique flag is specified, otherwise false.</returns>
+        // Method to check if the unique flag ("-uniq") is present in the command-line arguments
         public static bool ParseUniqueFlag(string[] args)
         {
-            for (int i = 1; i < args.Length; i++)
+            // Iterate through the arguments to find the "-uniq" option
+            for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] == "-uniq")
                 {
+                    // Return true if "-uniq" is found
                     return true;
                 }
             }
-            return false;
+            return false; // Return false if "-uniq" is not found
         }
     }
 }

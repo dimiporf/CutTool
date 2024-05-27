@@ -109,5 +109,63 @@ namespace CutTool
                 }
             }
         }
+
+        // Method to display and count unique values in a specified field
+        public static void DisplayAndCountUniqueValues(string filePath, int fieldNumber, string delimiter)
+        {
+            var uniqueValues = new HashSet<string>();
+            try
+            {
+                using (var reader = new StreamReader(filePath))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        string[] fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
+                        if (fieldNumber > 0 && fieldNumber <= fields.Length)
+                        {
+                            uniqueValues.Add(fields[fieldNumber - 1]);
+                        }
+                    }
+                }
+                foreach (var value in uniqueValues)
+                {
+                    Console.WriteLine(value);
+                }
+                Console.WriteLine($"Total unique values in field {fieldNumber}: {uniqueValues.Count}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error reading file: {ex.Message}");
+                Console.WriteLine($"Error reading file: {ex.Message}");
+            }
+        }
+
+        // Method to count all values (including duplicates) in a specified field
+        public static void CountAllValues(string filePath, int fieldNumber, string delimiter)
+        {
+            int totalCount = 0;
+            try
+            {
+                using (var reader = new StreamReader(filePath))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        string[] fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
+                        if (fieldNumber > 0 && fieldNumber <= fields.Length)
+                        {
+                            totalCount++;
+                        }
+                    }
+                }
+                Console.WriteLine($"Total values in field {fieldNumber}: {totalCount}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Error reading file: {ex.Message}");
+                Console.WriteLine($"Error reading file: {ex.Message}");
+            }
+        }
     }
 }

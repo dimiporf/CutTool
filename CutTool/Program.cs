@@ -31,6 +31,25 @@ namespace CutTool
                 // Process the file with all fields, delimiter, and unique flag
                 FileProcessor.ProcessFile(filePath, delimiter, unique);
             }
+
+            // Check for the -count flag
+            bool count = Array.Exists(args, arg => arg == "-count");
+            if (count && fieldList != null)
+            {
+                foreach (int fieldNumber in fieldList)
+                {
+                    // If unique flag is specified, display and count unique values
+                    if (unique)
+                    {
+                        FileProcessor.DisplayAndCountUniqueValues(filePath, fieldNumber, delimiter);
+                    }
+                    else
+                    {
+                        // Otherwise, count all values including duplicates
+                        FileProcessor.CountAllValues(filePath, fieldNumber, delimiter);
+                    }
+                }
+            }
         }
     }
 }

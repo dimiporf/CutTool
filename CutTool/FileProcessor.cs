@@ -113,6 +113,7 @@ namespace CutTool
         // Method to display and count unique values in a specified field
         public static void DisplayAndCountUniqueValues(string filePath, int fieldNumber, string delimiter)
         {
+            // HashSet to store unique values
             var uniqueValues = new HashSet<string>();
             try
             {
@@ -121,21 +122,26 @@ namespace CutTool
                     string line;
                     while ((line = reader.ReadLine()) != null)
                     {
+                        // Split the line into fields based on the specified delimiter
                         string[] fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
+                        // Check if the field number is valid and add the value to the HashSet
                         if (fieldNumber > 0 && fieldNumber <= fields.Length)
                         {
                             uniqueValues.Add(fields[fieldNumber - 1]);
                         }
                     }
                 }
+                // Print each unique value
                 foreach (var value in uniqueValues)
                 {
                     Console.WriteLine(value);
                 }
+                // Print the total count of unique values
                 Console.WriteLine($"Total unique values in field {fieldNumber}: {uniqueValues.Count}");
             }
             catch (Exception ex)
             {
+                // Log and print any exceptions that occur
                 Logger.Log($"Error reading file: {ex.Message}");
                 Console.WriteLine($"Error reading file: {ex.Message}");
             }
@@ -144,6 +150,7 @@ namespace CutTool
         // Method to count all values (including duplicates) in a specified field
         public static void CountAllValues(string filePath, int fieldNumber, string delimiter)
         {
+            // Counter to keep track of the total number of values
             int totalCount = 0;
             try
             {
@@ -152,17 +159,21 @@ namespace CutTool
                     string line;
                     while ((line = reader.ReadLine()) != null)
                     {
+                        // Split the line into fields based on the specified delimiter
                         string[] fields = line.Split(new string[] { delimiter }, StringSplitOptions.None);
+                        // Check if the field number is valid and increment the counter
                         if (fieldNumber > 0 && fieldNumber <= fields.Length)
                         {
                             totalCount++;
                         }
                     }
                 }
+                // Print the total count of values in the specified field
                 Console.WriteLine($"Total values in field {fieldNumber}: {totalCount}");
             }
             catch (Exception ex)
             {
+                // Log and print any exceptions that occur
                 Logger.Log($"Error reading file: {ex.Message}");
                 Console.WriteLine($"Error reading file: {ex.Message}");
             }

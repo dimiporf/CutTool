@@ -14,13 +14,13 @@ namespace CutTool
             int[] fieldList = InputParser.ParseFieldList(args); // Parse field list
             bool unique = InputParser.ParseUniqueFlag(args); // Parse unique flag
 
-            // If no delimiter is provided, determine the delimiter based on the file content
+            // If no delimiter is provided (default delimiter is tab), determine the delimiter based on the file content
             if (delimiter == "\t")
             {
                 delimiter = FileProcessor.DetermineDelimiter(filePath);
             }
 
-            // Check if field list is specified
+            // Check if a field list is specified
             if (fieldList != null)
             {
                 // Process the file with the specified field list, delimiter, and unique flag
@@ -36,16 +36,17 @@ namespace CutTool
             bool count = Array.Exists(args, arg => arg == "-count");
             if (count && fieldList != null)
             {
+                // Loop through each field number in the field list
                 foreach (int fieldNumber in fieldList)
                 {
-                    // If unique flag is specified, display and count unique values
+                    // If the unique flag is specified, display and count unique values in the field
                     if (unique)
                     {
                         FileProcessor.DisplayAndCountUniqueValues(filePath, fieldNumber, delimiter);
                     }
                     else
                     {
-                        // Otherwise, count all values including duplicates
+                        // Otherwise, count all values including duplicates in the field
                         FileProcessor.CountAllValues(filePath, fieldNumber, delimiter);
                     }
                 }

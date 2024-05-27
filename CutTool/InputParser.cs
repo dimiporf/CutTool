@@ -7,7 +7,17 @@
         public static string ParseFilePath(string[] args)
         {
             // If there are arguments, the first one is assumed to be the file path
-            return args.Length > 0 ? args[0] : null;
+            // Check if there are any arguments passed
+            if (args.Length > 0)
+            {
+                // Return the first argument as the file path
+                return args[0];
+            }
+            else
+            {
+                // If no arguments are passed, return null
+                return null;
+            }
         }
 
         // Method to parse the delimiter from the command-line arguments
@@ -16,13 +26,15 @@
             // Iterate through the arguments to find the "-delim" option
             for (int i = 0; i < args.Length - 1; i++)
             {
+                // Check if the current argument is "-delim"
                 if (args[i] == "-delim")
                 {
-                    // Return the delimiter value following the "-delim" option
+                    // Return the delimiter value that follows the "-delim" option
                     return args[i + 1];
                 }
             }
-            return "\t"; // Default to tab delimiter if not specified
+            // If no delimiter is specified, default to tab delimiter
+            return "\t";
         }
 
         // Method to parse the list of fields to extract from the command-line arguments
@@ -31,25 +43,31 @@
             // Iterate through the arguments to find the "-field" option
             for (int i = 0; i < args.Length - 1; i++)
             {
+                // Check if the current argument is "-field"
                 if (args[i] == "-field")
                 {
-                    // Split the field list string by commas and remove empty entries
+                    // Split the field list string by commas and remove any empty entries
                     string[] fieldListStr = args[i + 1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    // Create an integer array to store the field numbers
                     int[] fieldList = new int[fieldListStr.Length];
                     // Convert each field number from string to integer
                     for (int j = 0; j < fieldListStr.Length; j++)
                     {
+                        // Try to parse the field number and check if it's a valid positive integer
                         if (!int.TryParse(fieldListStr[j], out fieldList[j]) || fieldList[j] <= 0)
                         {
-                            // If conversion fails or number is not positive, display an error
+                            // If conversion fails or number is not positive, display an error message
                             Console.WriteLine("Field list must contain valid positive integers.");
+                            // Return null to indicate an error
                             return null;
                         }
                     }
-                    return fieldList; // Return the list of field numbers
+                    // Return the list of field numbers
+                    return fieldList;
                 }
             }
-            return null; // Return null if "-field" option is not found
+            // If "-field" option is not found, return null
+            return null;
         }
 
         // Method to check if the unique flag ("-uniq") is present in the command-line arguments
@@ -58,13 +76,32 @@
             // Iterate through the arguments to find the "-uniq" option
             for (int i = 0; i < args.Length; i++)
             {
+                // Check if the current argument is "-uniq"
                 if (args[i] == "-uniq")
                 {
                     // Return true if "-uniq" is found
                     return true;
                 }
             }
-            return false; // Return false if "-uniq" is not found
+            // If "-uniq" is not found, return false
+            return false;
+        }
+
+        // Method to check if the count flag ("-count") is present in the command-line arguments
+        public static bool ParseCountFlag(string[] args)
+        {
+            // Iterate through the arguments to find the "-count" option
+            for (int i = 0; i < args.Length; i++)
+            {
+                // Check if the current argument is "-count"
+                if (args[i] == "-count")
+                {
+                    // Return true if "-count" is found
+                    return true;
+                }
+            }
+            // If "-count" is not found, return false
+            return false;
         }
     }
 }

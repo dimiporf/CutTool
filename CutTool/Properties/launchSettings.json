@@ -2,7 +2,7 @@
   "profiles": {
     "CutTool": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\dimip\\source\\repos\\CutTool\\CutTool\\fourchords.csv -field 1 -delim a"
+      "commandLineArgs": "C:\\Users\\dimip\\source\\repos\\CutTool\\CutTool\\fourchords.csv -field 2 -uniq"
     }
   }
 }
